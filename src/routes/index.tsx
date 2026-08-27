@@ -1,24 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AppShell, FeedTabs } from "@/components/xora/AppShell";
+import { FeedList } from "@/components/xora/FeedList";
+import { TrendingRail } from "@/components/xora/TrendingRail";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Xora — Short video for people who teach" },
+      {
+        name: "description",
+        content:
+          "Xora is a warm, editorial home for short video, shorts and lessons. Follow creators, share ideas, learn something today.",
+      },
+      { property: "og:title", content: "Xora — Short video for people who teach" },
+      {
+        property: "og:description",
+        content: "Follow creators, watch shorts, and learn something new on Xora.",
+      },
+    ],
+  }),
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <AppShell rail={<TrendingRail />}>
+      <header className="mb-5">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-balance">
+          Your feed
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">Fresh from the creators you follow.</p>
+      </header>
+      <FeedTabs active="home" />
+      <FeedList feed="home" />
+    </AppShell>
   );
 }

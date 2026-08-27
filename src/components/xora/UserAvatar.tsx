@@ -3,10 +3,10 @@ import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  path?: string | null;
-  name?: string | null;
-  className?: string;
-  size?: number;
+  path?: string | null | undefined;
+  name?: string | null | undefined;
+  className?: string | undefined;
+  size?: number | undefined;
 };
 
 export function UserAvatar({ path, name, className, size = 40 }: Props) {

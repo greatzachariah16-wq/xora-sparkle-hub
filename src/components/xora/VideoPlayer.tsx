@@ -46,8 +46,8 @@ export function VideoPlayer({
     const video = videoRef.current;
     if (!video || !src) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) void video.play().catch(() => {});
+      (entries) => {
+        if (entries[0]?.isIntersecting) void video.play().catch(() => {});
         else video.pause();
       },
       { threshold: 0.6 },
