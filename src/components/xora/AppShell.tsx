@@ -42,7 +42,7 @@ export function AppShell({
   const { profile, isAdmin } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const unread = useUnreadCount();
-  const profileTo = profile ? "/profile/$username" : "/auth";
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,14 +94,24 @@ export function AppShell({
             <Search className="size-4.5" aria-hidden="true" />
             Search
           </Link>
-          <Link
-            to={profileTo}
-            params={profile ? { username: profile.username } : undefined}
-            className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
-          >
-            <User className="size-4.5" aria-hidden="true" />
-            {profile ? "Profile" : "Sign in"}
-          </Link>
+          {profile ? (
+            <Link
+              to="/profile/$username"
+              params={{ username: profile.username }}
+              className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <User className="size-4.5" aria-hidden="true" />
+              Profile
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <User className="size-4.5" aria-hidden="true" />
+              Sign in
+            </Link>
+          )}
           {isAdmin ? (
             <Link
               to="/admin"
@@ -148,14 +158,20 @@ export function AppShell({
               <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-primary ring-2 ring-background" />
             ) : null}
           </Link>
-          <Link
-            to={profileTo}
-            params={profile ? { username: profile.username } : undefined}
-            aria-label={profile ? "Your profile" : "Sign in"}
-            className="press ml-1"
-          >
-            <UserAvatar path={profile?.avatar_url} name={profile?.display_name} size={32} />
-          </Link>
+          {profile ? (
+            <Link
+              to="/profile/$username"
+              params={{ username: profile.username }}
+              aria-label="Your profile"
+              className="press ml-1"
+            >
+              <UserAvatar path={profile.avatar_url} name={profile.display_name} size={32} />
+            </Link>
+          ) : (
+            <Link to="/auth" aria-label="Sign in" className="press ml-1">
+              <UserAvatar size={32} />
+            </Link>
+          )}
         </div>
       </header>
 
