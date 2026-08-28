@@ -94,14 +94,24 @@ export function AppShell({
             <Search className="size-4.5" aria-hidden="true" />
             Search
           </Link>
-          <Link
-            to={profileTo}
-            params={profile ? { username: profile.username } : undefined}
-            className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
-          >
-            <User className="size-4.5" aria-hidden="true" />
-            {profile ? "Profile" : "Sign in"}
-          </Link>
+          {profile ? (
+            <Link
+              to="/profile/$username"
+              params={{ username: profile.username }}
+              className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <User className="size-4.5" aria-hidden="true" />
+              Profile
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <User className="size-4.5" aria-hidden="true" />
+              Sign in
+            </Link>
+          )}
           {isAdmin ? (
             <Link
               to="/admin"
