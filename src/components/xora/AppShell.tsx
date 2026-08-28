@@ -148,14 +148,20 @@ export function AppShell({
               <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-primary ring-2 ring-background" />
             ) : null}
           </Link>
-          <Link
-            to={profileTo}
-            params={profile ? { username: profile.username } : undefined}
-            aria-label={profile ? "Your profile" : "Sign in"}
-            className="press ml-1"
-          >
-            <UserAvatar path={profile?.avatar_url} name={profile?.display_name} size={32} />
-          </Link>
+          {profile ? (
+            <Link
+              to="/profile/$username"
+              params={{ username: profile.username }}
+              aria-label="Your profile"
+              className="press ml-1"
+            >
+              <UserAvatar path={profile.avatar_url} name={profile.display_name} size={32} />
+            </Link>
+          ) : (
+            <Link to="/auth" aria-label="Sign in" className="press ml-1">
+              <UserAvatar size={32} />
+            </Link>
+          )}
         </div>
       </header>
 
