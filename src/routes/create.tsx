@@ -58,13 +58,13 @@ function CreatePage() {
         .insert({
           author_id: user.id,
           kind,
-          feed: kind === "text" ? "home" : feed,
-          status: "published",
-          title: title.trim() || undefined,
-          caption: caption.trim() || undefined,
-          media_path: mediaPath,
-          poster_path: posterPath,
-          duration_seconds: durationSeconds,
+          feed: kind === "text" ? ("home" as const) : feed,
+          status: "published" as const,
+          ...(title.trim() ? { title: title.trim() } : {}),
+          ...(caption.trim() ? { caption: caption.trim() } : {}),
+          ...(mediaPath ? { media_path: mediaPath } : {}),
+          ...(posterPath ? { poster_path: posterPath } : {}),
+          ...(durationSeconds ? { duration_seconds: durationSeconds } : {}),
         })
         .select("id")
         .single();
