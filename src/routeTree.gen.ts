@@ -10,16 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShortsRouteImport } from './routes/shorts'
+import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
+import { Route as VideoPostIdRouteImport } from './routes/video.$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -52,73 +60,104 @@ const ShortsRoute = ShortsRouteImport.update({
   path: '/shorts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
+  id: '/profile/$username',
+  path: '/profile/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideoPostIdRoute = VideoPostIdRouteImport.update({
+  id: '/video/$postId',
+  path: '/video/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
+  '/profile/$username': typeof ProfileUsernameRoute
+  '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
+  '/profile/$username': typeof ProfileUsernameRoute
+  '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
+  '/profile/$username': typeof ProfileUsernameRoute
+  '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/create'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
+    | '/profile/$username'
+    | '/video/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
     | '/create'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
+    | '/profile/$username'
+    | '/video/$postId'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
     | '/create'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
+    | '/profile/$username'
+    | '/video/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreateRoute: typeof CreateRoute
   LearnRoute: typeof LearnRoute
   NotificationsRoute: typeof NotificationsRoute
   SearchRoute: typeof SearchRoute
   ShortsRoute: typeof ShortsRoute
+  ProfileUsernameRoute: typeof ProfileUsernameRoute
+  VideoPostIdRoute: typeof VideoPostIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -128,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -172,17 +218,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShortsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/$username': {
+      id: '/profile/$username'
+      path: '/profile/$username'
+      fullPath: '/profile/$username'
+      preLoaderRoute: typeof ProfileUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/video/$postId': {
+      id: '/video/$postId'
+      path: '/video/$postId'
+      fullPath: '/video/$postId'
+      preLoaderRoute: typeof VideoPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreateRoute: CreateRoute,
   LearnRoute: LearnRoute,
   NotificationsRoute: NotificationsRoute,
   SearchRoute: SearchRoute,
   ShortsRoute: ShortsRoute,
+  ProfileUsernameRoute: ProfileUsernameRoute,
+  VideoPostIdRoute: VideoPostIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
