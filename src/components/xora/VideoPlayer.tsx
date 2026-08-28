@@ -320,20 +320,7 @@ export function VideoPlayer({
         </span>
       ) : null}
 
-      {!playing && !failed && adState === "idle" ? (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label="Play video"
-          className="press absolute inset-0 grid place-items-center bg-ink/15"
-        >
-          <span className="grid size-14 place-items-center rounded-full bg-background/85 shadow-lift">
-            <Play className="ml-0.5 size-6 fill-foreground text-foreground" aria-hidden="true" />
-          </span>
-        </button>
-      ) : null}
-
-      {!playing && !failed && adDone ? (
+      {!playing && !failed && (adState === "idle" || adDone) ? (
         <button
           type="button"
           onClick={toggle}
