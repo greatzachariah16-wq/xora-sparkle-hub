@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CreateRouteImport } from './routes/create'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShortsRouteImport } from './routes/shorts'
 
@@ -25,9 +27,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -44,14 +56,18 @@ const ShortsRoute = ShortsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
+  '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
+  '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
 }
@@ -59,22 +75,48 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/create': typeof CreateRoute
   '/learn': typeof LearnRoute
+  '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/learn' | '/search' | '/shorts'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/create'
+    | '/learn'
+    | '/notifications'
+    | '/search'
+    | '/shorts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/learn' | '/search' | '/shorts'
-  id: '__root__' | '/' | '/auth' | '/learn' | '/search' | '/shorts'
+  to:
+    | '/'
+    | '/auth'
+    | '/create'
+    | '/learn'
+    | '/notifications'
+    | '/search'
+    | '/shorts'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/create'
+    | '/learn'
+    | '/notifications'
+    | '/search'
+    | '/shorts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CreateRoute: typeof CreateRoute
   LearnRoute: typeof LearnRoute
+  NotificationsRoute: typeof NotificationsRoute
   SearchRoute: typeof SearchRoute
   ShortsRoute: typeof ShortsRoute
 }
@@ -95,11 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -122,7 +178,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CreateRoute: CreateRoute,
   LearnRoute: LearnRoute,
+  NotificationsRoute: NotificationsRoute,
   SearchRoute: SearchRoute,
   ShortsRoute: ShortsRoute,
 }
