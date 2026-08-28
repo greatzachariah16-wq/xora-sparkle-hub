@@ -42,7 +42,7 @@ export function AppShell({
   const { profile, isAdmin } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const unread = useUnreadCount();
-  const profileTo = profile ? "/profile/$username" : "/auth";
+  
 
   return (
     <div className="min-h-screen bg-background">
