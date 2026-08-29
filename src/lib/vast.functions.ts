@@ -1,15 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import { resolveVast, type VastResult } from "./vast.server";
-
-const VAST_TAG =
-  "https://oiidwgfyo.com?js=1&code_type=1&vast=1&vast_position=preroll&sid=944201";
+import { VAST_AD_URL } from "@/config/ads";
+import { resolveVast } from "./vast.server";
+import type { VastResult } from "./vast.types";
 
 export const getPrerollAd = createServerFn({ method: "GET" }).handler(
   async (): Promise<VastResult> => {
-    const cacheBusted = `${VAST_TAG}&cb=${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+    const separator = VAST_AD_URL.includes("?") ? "&" : "?";
+    const cacheBusted = `${VAST_AD_URL}${separator}cb=${Date.now()}${Math.floor(Math.random() * 1e6)}`;
     try {
       return await resolveVast(cacheBusted);
-    } catch {
+    } catch (error) {
+      console.error("[VAST] preroll resolution error:", error);
       return { ok: false, reason: "network", message: "Ad request failed." };
     }
   },
