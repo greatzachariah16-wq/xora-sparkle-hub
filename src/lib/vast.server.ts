@@ -1,20 +1,11 @@
-/** Minimal VAST 2/3/4 fetcher + parser that runs on the server (no DOMParser). */
+/**
+ * VAST resolution service. Runs server-side (no CORS, no ad-blocker interference)
+ * and uses the IAB-compliant @dailymotion/vast-client parser — no hand-rolled XML.
+ */
+import { VAST_MAX_WRAPPER_DEPTH, VAST_TIMEOUT_MS } from "@/config/ads";
+import type { VastAd, VastResult } from "./vast.types";
 
-export type VastAd = {
-  mediaUrl: string;
-  mimeType: string;
-  duration: number | null;
-  clickThrough: string | null;
-  impressions: string[];
-  trackingComplete: string[];
-};
-
-export type VastResult =
-  | { ok: true; ad: VastAd }
-  | { ok: false; reason: "nofill" | "invalid" | "timeout" | "network" | "nomedia"; message: string };
-
-const VAST_TIMEOUT_MS = 8000;
-const MAX_WRAPPERS = 4;
+export type { VastAd, VastResult } from "./vast.types";
 
 const PLAYABLE = [
   "video/mp4",
@@ -24,128 +15,120 @@ const PLAYABLE = [
   "application/vnd.apple.mpegurl",
 ];
 
-function tagContents(xml: string, tag: string): string[] {
-  const out: string[] = [];
-  const re = new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi");
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(xml))) out.push(m[1] ?? "");
-  return out;
+type UrlLike = string | { url?: string } | null | undefined;
+
+type ParsedMediaFile = { fileURL?: string | null; mimeType?: string | null; width?: number };
+
+type ParsedCreative = {
+  type?: string;
+  duration?: number | null;
+  skipDelay?: string | number | null;
+  mediaFiles?: ParsedMediaFile[];
+  videoClickThroughURLTemplate?: UrlLike;
+  videoClickTrackingURLTemplates?: UrlLike[];
+  trackingEvents?: Record<string, string[]>;
+};
+
+type ParsedAd = {
+  title?: string | null;
+  creatives?: ParsedCreative[];
+  impressionURLTemplates?: UrlLike[];
+  errorURLTemplates?: (string | null | undefined)[];
+};
+
+type ParsedResponse = {
+  ads?: ParsedAd[];
+  errorURLTemplates?: unknown[];
+};
+
+function asUrl(value: UrlLike): string | null {
+  if (typeof value === "string") return value || null;
+  return value?.url ?? null;
 }
 
-function tagNodes(xml: string, tag: string): { attrs: string; body: string }[] {
-  const out: { attrs: string; body: string }[] = [];
-  const re = new RegExp(`<${tag}\\b([^>]*)>([\\s\\S]*?)<\\/${tag}>`, "gi");
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(xml))) out.push({ attrs: m[1] ?? "", body: m[2] ?? "" });
-  return out;
-}
-
-function attr(attrs: string, name: string): string | null {
-  const m = new RegExp(`${name}\\s*=\\s*["']([^"']*)["']`, "i").exec(attrs);
-  return m?.[1] ?? null;
-}
-
-function clean(value: string): string {
-  return value
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/&amp;/g, "&")
-    .trim();
-}
-
-function parseDuration(value: string | undefined): number | null {
-  if (!value) return null;
-  const parts = clean(value).split(":").map(Number);
-  if (parts.some((n) => Number.isNaN(n))) return null;
+function parseSkipOffset(raw: unknown, duration: number | null): number | null {
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+  if (typeof raw !== "string" || !raw) return null;
+  if (raw.endsWith("%")) {
+    const pct = Number(raw.slice(0, -1));
+    if (!Number.isFinite(pct) || duration == null) return null;
+    return (duration * pct) / 100;
+  }
+  const parts = raw.split(":").map(Number);
+  if (parts.some((n) => !Number.isFinite(n))) return null;
   if (parts.length === 3) return parts[0]! * 3600 + parts[1]! * 60 + parts[2]!;
   if (parts.length === 2) return parts[0]! * 60 + parts[1]!;
   return parts[0] ?? null;
 }
 
-async function fetchXml(url: string): Promise<string> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), VAST_TIMEOUT_MS);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: { accept: "application/xml,text/xml,*/*" },
-    });
-    if (!res.ok) throw new Error(`status ${res.status}`);
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
-  }
-}
+export async function resolveVast(url: string): Promise<VastResult> {
+  const { VASTClient } = await import("@dailymotion/vast-client");
+  const client = new VASTClient();
 
-export async function resolveVast(url: string, depth = 0): Promise<VastResult> {
-  let xml: string;
+  let response: ParsedResponse | null = null;
   try {
-    xml = await fetchXml(url);
+    response = (await client.get(url, {
+      timeout: VAST_TIMEOUT_MS,
+      withCredentials: false,
+      wrapperLimit: VAST_MAX_WRAPPER_DEPTH,
+      resolveAll: true,
+    })) as unknown as ParsedResponse;
   } catch (error) {
-    const aborted = error instanceof Error && error.name === "AbortError";
+    const message = error instanceof Error ? error.message : String(error);
+    const timedOut = /timeout|408|abort/i.test(message);
+    console.error("[VAST] request failed:", message);
     return {
       ok: false,
-      reason: aborted ? "timeout" : "network",
-      message: aborted ? "Ad request timed out." : "Ad request failed.",
+      reason: timedOut ? "timeout" : "network",
+      message: timedOut ? "Ad request timed out." : "Ad request failed.",
     };
   }
 
-  if (!xml || !/<VAST[\s>]/i.test(xml)) {
-    return { ok: false, reason: "invalid", message: "Invalid ad response." };
-  }
-  if (!/<Ad\b/i.test(xml)) {
+  if (!response) return { ok: false, reason: "invalid", message: "Invalid ad response." };
+  if (!response.ads?.length) {
     return { ok: false, reason: "nofill", message: "No advertisement available." };
   }
 
-  // Wrapper: follow the redirect tag.
-  const wrapperTag = tagContents(xml, "VASTAdTagURI")[0];
-  if (wrapperTag && depth < MAX_WRAPPERS) {
-    const next = clean(wrapperTag);
-    if (next) {
-      const inner = await resolveVast(next, depth + 1);
-      if (inner.ok) {
-        const outerImps = tagContents(xml, "Impression").map(clean).filter(Boolean);
-        return { ok: true, ad: { ...inner.ad, impressions: [...outerImps, ...inner.ad.impressions] } };
-      }
-      return inner;
+  for (const ad of response.ads) {
+    for (const creative of ad.creatives ?? []) {
+      if (creative.type !== "linear") continue;
+
+      const candidates = (creative.mediaFiles ?? [])
+        .map((m: ParsedMediaFile) => ({
+          url: m.fileURL ?? "",
+          type: (m.mimeType ?? "").toLowerCase(),
+          width: Number(m.width ?? 0) || 0,
+        }))
+        .filter((m) => m.url && PLAYABLE.includes(m.type));
+      if (candidates.length === 0) continue;
+
+      candidates.sort((a, b) => {
+        const rank = (t: string) => (t === "video/mp4" ? 0 : t === "video/webm" ? 1 : 2);
+        return rank(a.type) - rank(b.type) || a.width - b.width;
+      });
+      const best = candidates.find((c) => c.width >= 640) ?? candidates[candidates.length - 1]!;
+
+      const duration = Number.isFinite(creative.duration) ? Number(creative.duration) : null;
+
+      const parsedAd: VastAd = {
+        mediaUrl: best.url,
+        mimeType: best.type,
+        duration,
+        skipOffset: parseSkipOffset(creative.skipDelay, duration),
+        clickThrough: asUrl(creative.videoClickThroughURLTemplate),
+        adTitle: ad.title ?? null,
+        impressions: (ad.impressionURLTemplates ?? [])
+          .map(asUrl)
+          .filter((u): u is string => Boolean(u)),
+        tracking: creative.trackingEvents ?? {},
+        clickTracking: (creative.videoClickTrackingURLTemplates ?? [])
+          .map(asUrl)
+          .filter((u): u is string => Boolean(u)),
+        errorUrls: (ad.errorURLTemplates ?? []).filter((u): u is string => Boolean(u)),
+      };
+      return { ok: true, ad: parsedAd };
     }
   }
 
-  const linear = tagContents(xml, "Linear")[0];
-  if (!linear) return { ok: false, reason: "nomedia", message: "No playable advertisement." };
-
-  const candidates = tagNodes(linear, "MediaFile")
-    .map((node) => ({
-      url: clean(node.body),
-      type: (attr(node.attrs, "type") ?? "").toLowerCase(),
-      width: Number(attr(node.attrs, "width") ?? 0) || 0,
-      delivery: (attr(node.attrs, "delivery") ?? "").toLowerCase(),
-    }))
-    .filter((m) => m.url && PLAYABLE.includes(m.type));
-
-  if (candidates.length === 0) {
-    return { ok: false, reason: "nomedia", message: "Advertisement format is not supported." };
-  }
-
-  candidates.sort((a, b) => {
-    const rank = (t: string) => (t === "video/mp4" ? 0 : t === "video/webm" ? 1 : 2);
-    return rank(a.type) - rank(b.type) || a.width - b.width;
-  });
-  const best = candidates.find((c) => c.width >= 640) ?? candidates[candidates.length - 1]!;
-
-  const trackingComplete = tagNodes(linear, "Tracking")
-    .filter((n) => (attr(n.attrs, "event") ?? "").toLowerCase() === "complete")
-    .map((n) => clean(n.body))
-    .filter(Boolean);
-
-  return {
-    ok: true,
-    ad: {
-      mediaUrl: best.url,
-      mimeType: best.type,
-      duration: parseDuration(tagContents(linear, "Duration")[0]),
-      clickThrough: clean(tagContents(linear, "ClickThrough")[0] ?? "") || null,
-      impressions: tagContents(xml, "Impression").map(clean).filter(Boolean),
-      trackingComplete,
-    },
-  };
+  return { ok: false, reason: "nomedia", message: "No playable advertisement returned." };
 }
