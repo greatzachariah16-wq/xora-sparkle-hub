@@ -5,6 +5,8 @@
 import { VAST_MAX_WRAPPER_DEPTH, VAST_TIMEOUT_MS } from "@/config/ads";
 import type { VastAd, VastResult } from "./vast.types";
 
+export type { VastAd, VastResult } from "./vast.types";
+
 const PLAYABLE = [
   "video/mp4",
   "video/webm",
@@ -13,7 +15,39 @@ const PLAYABLE = [
   "application/vnd.apple.mpegurl",
 ];
 
+type UrlLike = string | { url?: string } | null | undefined;
+
+type ParsedMediaFile = { fileURL?: string | null; mimeType?: string | null; width?: number };
+
+type ParsedCreative = {
+  type?: string;
+  duration?: number | null;
+  skipDelay?: string | number | null;
+  mediaFiles?: ParsedMediaFile[];
+  videoClickThroughURLTemplate?: UrlLike;
+  videoClickTrackingURLTemplates?: UrlLike[];
+  trackingEvents?: Record<string, string[]>;
+};
+
+type ParsedAd = {
+  title?: string | null;
+  creatives?: ParsedCreative[];
+  impressionURLTemplates?: UrlLike[];
+  errorURLTemplates?: (string | null | undefined)[];
+};
+
+type ParsedResponse = {
+  ads?: ParsedAd[];
+  errorURLTemplates?: unknown[];
+};
+
+function asUrl(value: UrlLike): string | null {
+  if (typeof value === "string") return value || null;
+  return value?.url ?? null;
+}
+
 function parseSkipOffset(raw: unknown, duration: number | null): number | null {
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
   if (typeof raw !== "string" || !raw) return null;
   if (raw.endsWith("%")) {
     const pct = Number(raw.slice(0, -1));
@@ -31,14 +65,14 @@ export async function resolveVast(url: string): Promise<VastResult> {
   const { VASTClient } = await import("@dailymotion/vast-client");
   const client = new VASTClient();
 
-  let response: Awaited<ReturnType<VASTClient["get"]>>;
+  let response: ParsedResponse | null = null;
   try {
-    response = await client.get(url, {
+    response = (await client.get(url, {
       timeout: VAST_TIMEOUT_MS,
       withCredentials: false,
       wrapperLimit: VAST_MAX_WRAPPER_DEPTH,
       resolveAll: true,
-    });
+    })) as unknown as ParsedResponse;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const timedOut = /timeout|408|abort/i.test(message);
@@ -51,9 +85,6 @@ export async function resolveVast(url: string): Promise<VastResult> {
   }
 
   if (!response) return { ok: false, reason: "invalid", message: "Invalid ad response." };
-  if (response.errorURLTemplates?.length && !response.ads?.length) {
-    return { ok: false, reason: "nofill", message: "No advertisement available." };
-  }
   if (!response.ads?.length) {
     return { ok: false, reason: "nofill", message: "No advertisement available." };
   }
@@ -61,17 +92,9 @@ export async function resolveVast(url: string): Promise<VastResult> {
   for (const ad of response.ads) {
     for (const creative of ad.creatives ?? []) {
       if (creative.type !== "linear") continue;
-      const linear = creative as typeof creative & {
-        mediaFiles?: { fileURL?: string | null; mimeType?: string | null; width?: number }[];
-        skipDelay?: string | number | null;
-        duration?: number | null;
-        videoClickThroughURLTemplate?: { url?: string } | string | null;
-        videoClickTrackingURLTemplates?: ({ url?: string } | string)[];
-        trackingEvents?: Record<string, string[]>;
-      };
 
-      const candidates = (linear.mediaFiles ?? [])
-        .map((m) => ({
+      const candidates = (creative.mediaFiles ?? [])
+        .map((m: ParsedMediaFile) => ({
           url: m.fileURL ?? "",
           type: (m.mimeType ?? "").toLowerCase(),
           width: Number(m.width ?? 0) || 0,
@@ -85,27 +108,25 @@ export async function resolveVast(url: string): Promise<VastResult> {
       });
       const best = candidates.find((c) => c.width >= 640) ?? candidates[candidates.length - 1]!;
 
-      const duration = Number.isFinite(linear.duration) ? Number(linear.duration) : null;
-      const asUrl = (v: unknown): string | null =>
-        typeof v === "string" ? v : ((v as { url?: string } | null)?.url ?? null);
+      const duration = Number.isFinite(creative.duration) ? Number(creative.duration) : null;
 
-      const result: VastAd = {
+      const parsedAd: VastAd = {
         mediaUrl: best.url,
         mimeType: best.type,
         duration,
-        skipOffset: parseSkipOffset(linear.skipDelay, duration),
-        clickThrough: asUrl(linear.videoClickThroughURLTemplate),
+        skipOffset: parseSkipOffset(creative.skipDelay, duration),
+        clickThrough: asUrl(creative.videoClickThroughURLTemplate),
         adTitle: ad.title ?? null,
         impressions: (ad.impressionURLTemplates ?? [])
-          .map((i) => asUrl(i))
+          .map(asUrl)
           .filter((u): u is string => Boolean(u)),
-        tracking: linear.trackingEvents ?? {},
-        clickTracking: (linear.videoClickTrackingURLTemplates ?? [])
-          .map((c) => asUrl(c))
+        tracking: creative.trackingEvents ?? {},
+        clickTracking: (creative.videoClickTrackingURLTemplates ?? [])
+          .map(asUrl)
           .filter((u): u is string => Boolean(u)),
         errorUrls: (ad.errorURLTemplates ?? []).filter((u): u is string => Boolean(u)),
       };
-      return { ok: true, ad: result };
+      return { ok: true, ad: parsedAd };
     }
   }
 
