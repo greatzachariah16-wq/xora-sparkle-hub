@@ -167,8 +167,6 @@ export function VideoPlayer({
           src={src}
           poster={poster ?? undefined}
           playsInline
-          // eslint-disable-next-line react/no-unknown-property
-          x-webkit-airplay="allow"
           loop={loop}
           muted={muted}
           preload="metadata"
