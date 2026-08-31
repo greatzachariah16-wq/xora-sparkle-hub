@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { notificationsQuery } from "@/lib/api";
 import { Logo } from "./Logo";
+import { AdverticaBanner } from "./AdverticaBanner";
 import { UserAvatar } from "./UserAvatar";
 import { cn } from "@/lib/utils";
 
@@ -182,6 +183,7 @@ export function AppShell({
             wide ? "max-w-5xl" : "max-w-[620px]",
           )}
         >
+          <AdverticaBanner className="mb-5" />
           {children}
         </div>
       </main>
