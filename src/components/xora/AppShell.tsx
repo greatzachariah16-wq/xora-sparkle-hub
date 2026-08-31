@@ -183,7 +183,9 @@ export function AppShell({
             wide ? "max-w-5xl" : "max-w-[620px]",
           )}
         >
-          <AdverticaBanner className="mb-5" />
+          <div className="sticky top-14 z-30 mb-5 flex justify-center overflow-x-clip lg:top-0">
+            <AdverticaBanner />
+          </div>
           {children}
         </div>
       </main>
