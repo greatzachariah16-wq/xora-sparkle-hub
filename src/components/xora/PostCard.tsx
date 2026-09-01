@@ -6,6 +6,7 @@ import { useLikes, useFollows } from "@/hooks/useEngagement";
 import { useAuth } from "@/hooks/useAuth";
 import { UserAvatar } from "./UserAvatar";
 import { VideoPlayer } from "./VideoPlayer";
+import { HilltopAdsVideoSlider } from "./HilltopAdsVideoSlider";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -92,6 +93,8 @@ export function PostCard({ post, vertical = false }: Props) {
           </p>
         )}
       </div>
+
+      {post.kind === "video" && !vertical ? <HilltopAdsVideoSlider className="mt-3 px-3" /> : null}
 
       <div className="px-3 pb-3 pt-3">
         {post.title ? (
