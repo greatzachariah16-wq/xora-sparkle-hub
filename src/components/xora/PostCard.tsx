@@ -94,7 +94,7 @@ export function PostCard({ post, vertical = false }: Props) {
         )}
       </div>
 
-      {post.kind === "video" ? <HilltopAdsVideoSlider className="mt-3 px-3" /> : null}
+      {post.kind === "video" && !vertical ? <HilltopAdsVideoSlider className="mt-3 px-3" /> : null}
 
       <div className="px-3 pb-3 pt-3">
         {post.title ? (
