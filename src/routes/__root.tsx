@@ -97,6 +97,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
+    scripts: [
+      {
+        src: "https://quge5.com/88/tag.min.js",
+        async: true,
+        "data-zone": "275598",
+        "data-cfasync": "false",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
