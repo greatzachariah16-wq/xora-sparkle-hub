@@ -1,7 +1,19 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
-import type { PostWithAuthor } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Heart, MessageCircle, Share2, Trash2, Loader2 } from "lucide-react";
+import { deletePost, type PostWithAuthor } from "@/lib/api";
 import { compactNumber, duration, timeAgo } from "@/lib/format";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLikes, useFollows } from "@/hooks/useEngagement";
 import { useAuth } from "@/hooks/useAuth";
 import { UserAvatar } from "./UserAvatar";
@@ -22,6 +34,21 @@ export function PostCard({ post, vertical = false }: Props) {
   const liked = likes.isLiked(post.id);
   const author = post.author;
   const isOwn = user?.id === post.author_id;
+  const queryClient = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePost(post.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", post.id] });
+      queryClient.invalidateQueries({ queryKey: ["search"] });
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+      toast.success("Post deleted");
+    },
+    onError: () => toast.error("Couldn't delete this post"),
+  });
 
   const share = async () => {
     const url = `${window.location.origin}/video/${post.id}`;
@@ -69,6 +96,46 @@ export function PostCard({ post, vertical = false }: Props) {
           >
             {follows.isFollowing(author.id) ? "Following" : "Follow"}
           </button>
+        ) : null}
+        {isOwn ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              aria-label="Delete post"
+              className="press ml-auto shrink-0 rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-destructive"
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+            </button>
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this post? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(event) => {
+                      event.preventDefault();
+                      deleteMutation.mutate(undefined, {
+                        onSettled: () => setConfirmOpen(false),
+                      });
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleteMutation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    ) : null}
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         ) : null}
       </header>
 
