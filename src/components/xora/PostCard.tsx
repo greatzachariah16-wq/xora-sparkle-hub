@@ -1,7 +1,19 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
-import type { PostWithAuthor } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Heart, MessageCircle, Share2, Trash2, Loader2 } from "lucide-react";
+import { deletePost, type PostWithAuthor } from "@/lib/api";
 import { compactNumber, duration, timeAgo } from "@/lib/format";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useLikes, useFollows } from "@/hooks/useEngagement";
 import { useAuth } from "@/hooks/useAuth";
 import { UserAvatar } from "./UserAvatar";
