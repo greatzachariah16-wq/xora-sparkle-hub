@@ -193,6 +193,11 @@ export async function toggleLike(postId: string, userId: string, liked: boolean)
   }
 }
 
+export async function deletePost(postId: string) {
+  const { error } = await supabase.from("posts").delete().eq("id", postId);
+  if (error) throw error;
+}
+
 export async function toggleFollow(targetId: string, userId: string, following: boolean) {
   if (following) {
     const { error } = await supabase
