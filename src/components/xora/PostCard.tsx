@@ -34,6 +34,21 @@ export function PostCard({ post, vertical = false }: Props) {
   const liked = likes.isLiked(post.id);
   const author = post.author;
   const isOwn = user?.id === post.author_id;
+  const queryClient = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePost(post.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["profile-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", post.id] });
+      queryClient.invalidateQueries({ queryKey: ["search"] });
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+      toast.success("Post deleted");
+    },
+    onError: () => toast.error("Couldn't delete this post"),
+  });
 
   const share = async () => {
     const url = `${window.location.origin}/video/${post.id}`;
