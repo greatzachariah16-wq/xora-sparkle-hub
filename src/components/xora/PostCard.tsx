@@ -97,6 +97,46 @@ export function PostCard({ post, vertical = false }: Props) {
             {follows.isFollowing(author.id) ? "Following" : "Follow"}
           </button>
         ) : null}
+        {isOwn ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              aria-label="Delete post"
+              className="press ml-auto shrink-0 rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-destructive"
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+            </button>
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this post? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(event) => {
+                      event.preventDefault();
+                      deleteMutation.mutate(undefined, {
+                        onSettled: () => setConfirmOpen(false),
+                      });
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleteMutation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    ) : null}
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        ) : null}
       </header>
 
       <div className="px-3 pt-3">
