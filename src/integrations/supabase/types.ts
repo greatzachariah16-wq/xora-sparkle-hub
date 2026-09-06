@@ -53,6 +53,66 @@ export type Database = {
           },
         ]
       }
+      discovery_runs: {
+        Row: {
+          duplicates: number
+          error: string | null
+          examined: number
+          finished_at: string | null
+          id: string
+          inserted: number
+          ok: boolean
+          pending: number
+          rejected: number
+          source: Database["public"]["Enums"]["content_source"]
+          started_at: string
+        }
+        Insert: {
+          duplicates?: number
+          error?: string | null
+          examined?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          ok?: boolean
+          pending?: number
+          rejected?: number
+          source: Database["public"]["Enums"]["content_source"]
+          started_at?: string
+        }
+        Update: {
+          duplicates?: number
+          error?: string | null
+          examined?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          ok?: boolean
+          pending?: number
+          rejected?: number
+          source?: Database["public"]["Enums"]["content_source"]
+          started_at?: string
+        }
+        Relationships: []
+      }
+      discovery_settings: {
+        Row: {
+          id: boolean
+          updated_at: string
+          weights: Json
+        }
+        Insert: {
+          id?: boolean
+          updated_at?: string
+          weights: Json
+        }
+        Update: {
+          id?: boolean
+          updated_at?: string
+          weights?: Json
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -166,52 +226,139 @@ export type Database = {
       }
       posts: {
         Row: {
-          author_id: string
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          audio_info: string | null
+          audio_quality: string | null
+          author_id: string | null
+          canonical_url: string | null
           caption: string
+          category: string | null
           comment_count: number
           created_at: string
+          discovered_at: string | null
           duration_seconds: number | null
+          external_creator: string | null
+          external_id: string | null
+          featured: boolean
           feed: Database["public"]["Enums"]["feed_type"]
+          frame_rate: number | null
+          home_eligible: boolean
           id: string
+          interestingness_score: number
+          is_color: boolean | null
+          keywords: string[]
           kind: Database["public"]["Enums"]["post_kind"]
+          license: string | null
+          license_url: string | null
           like_count: number
           media_path: string | null
+          media_type: string | null
+          playback_url: string | null
           poster_path: string | null
+          published_at: string | null
+          quality_score: number
+          recommendation_score: number
+          rejection_reason: string | null
+          resolution_height: number | null
+          rights_confidence: number
+          rights_status: Database["public"]["Enums"]["rights_status"]
+          shorts_eligible: boolean
+          source: Database["public"]["Enums"]["content_source"]
+          source_metadata: Json | null
           status: Database["public"]["Enums"]["post_status"]
+          thumbnail_url: string | null
           title: string
           updated_at: string
           view_count: number
         }
         Insert: {
-          author_id: string
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          audio_info?: string | null
+          audio_quality?: string | null
+          author_id?: string | null
+          canonical_url?: string | null
           caption?: string
+          category?: string | null
           comment_count?: number
           created_at?: string
+          discovered_at?: string | null
           duration_seconds?: number | null
+          external_creator?: string | null
+          external_id?: string | null
+          featured?: boolean
           feed?: Database["public"]["Enums"]["feed_type"]
+          frame_rate?: number | null
+          home_eligible?: boolean
           id?: string
+          interestingness_score?: number
+          is_color?: boolean | null
+          keywords?: string[]
           kind?: Database["public"]["Enums"]["post_kind"]
+          license?: string | null
+          license_url?: string | null
           like_count?: number
           media_path?: string | null
+          media_type?: string | null
+          playback_url?: string | null
           poster_path?: string | null
+          published_at?: string | null
+          quality_score?: number
+          recommendation_score?: number
+          rejection_reason?: string | null
+          resolution_height?: number | null
+          rights_confidence?: number
+          rights_status?: Database["public"]["Enums"]["rights_status"]
+          shorts_eligible?: boolean
+          source?: Database["public"]["Enums"]["content_source"]
+          source_metadata?: Json | null
           status?: Database["public"]["Enums"]["post_status"]
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           view_count?: number
         }
         Update: {
-          author_id?: string
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          audio_info?: string | null
+          audio_quality?: string | null
+          author_id?: string | null
+          canonical_url?: string | null
           caption?: string
+          category?: string | null
           comment_count?: number
           created_at?: string
+          discovered_at?: string | null
           duration_seconds?: number | null
+          external_creator?: string | null
+          external_id?: string | null
+          featured?: boolean
           feed?: Database["public"]["Enums"]["feed_type"]
+          frame_rate?: number | null
+          home_eligible?: boolean
           id?: string
+          interestingness_score?: number
+          is_color?: boolean | null
+          keywords?: string[]
           kind?: Database["public"]["Enums"]["post_kind"]
+          license?: string | null
+          license_url?: string | null
           like_count?: number
           media_path?: string | null
+          media_type?: string | null
+          playback_url?: string | null
           poster_path?: string | null
+          published_at?: string | null
+          quality_score?: number
+          recommendation_score?: number
+          rejection_reason?: string | null
+          resolution_height?: number | null
+          rights_confidence?: number
+          rights_status?: Database["public"]["Enums"]["rights_status"]
+          shorts_eligible?: boolean
+          source?: Database["public"]["Enums"]["content_source"]
+          source_metadata?: Json | null
           status?: Database["public"]["Enums"]["post_status"]
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           view_count?: number
@@ -304,10 +451,24 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      approval_status: "approved" | "pending_review" | "rejected" | "hidden"
+      content_source:
+        | "creator"
+        | "internet_archive"
+        | "wikimedia_commons"
+        | "nasa_svs"
       feed_type: "home" | "shorts" | "learn"
       notification_kind: "like" | "comment" | "follow"
       post_kind: "video" | "text"
       post_status: "published" | "flagged" | "removed"
+      rights_status:
+        | "public_domain"
+        | "cc0"
+        | "cc_by"
+        | "cc_by_sa"
+        | "other_open"
+        | "unknown"
+        | "restricted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -436,10 +597,26 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      approval_status: ["approved", "pending_review", "rejected", "hidden"],
+      content_source: [
+        "creator",
+        "internet_archive",
+        "wikimedia_commons",
+        "nasa_svs",
+      ],
       feed_type: ["home", "shorts", "learn"],
       notification_kind: ["like", "comment", "follow"],
       post_kind: ["video", "text"],
       post_status: ["published", "flagged", "removed"],
+      rights_status: [
+        "public_domain",
+        "cc0",
+        "cc_by",
+        "cc_by_sa",
+        "other_open",
+        "unknown",
+        "restricted",
+      ],
     },
   },
 } as const
