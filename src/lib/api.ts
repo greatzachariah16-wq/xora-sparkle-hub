@@ -21,6 +21,9 @@ export function feedQuery(feed: FeedType) {
         .select(POST_SELECT)
         .eq("feed", feed)
         .eq("status", "published")
+        .eq("approval_status", "approved")
+        .order("featured", { ascending: false })
+        .order("recommendation_score", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(30);
       if (error) throw error;
@@ -28,6 +31,63 @@ export function feedQuery(feed: FeedType) {
     },
   });
 }
+
+export type DiscoveryQueueKey =
+  | "recommended"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "rights_uncertain"
+  | "low_quality"
+  | "black_and_white"
+  | "new";
+
+export function discoveryPostsQuery(queue: DiscoveryQueueKey) {
+  return queryOptions({
+    queryKey: ["admin", "discovery", queue],
+    queryFn: async (): Promise<PostWithAuthor[]> => {
+      let q = supabase.from("posts").select(POST_SELECT).neq("source", "creator");
+
+      if (queue === "recommended")
+        q = q.eq("approval_status", "approved").order("recommendation_score", { ascending: false });
+      else if (queue === "pending")
+        q = q.eq("approval_status", "pending_review").order("discovered_at", { ascending: false });
+      else if (queue === "approved")
+        q = q.eq("approval_status", "approved").order("discovered_at", { ascending: false });
+      else if (queue === "rejected")
+        q = q.eq("approval_status", "rejected").order("discovered_at", { ascending: false });
+      else if (queue === "rights_uncertain")
+        q = q.in("rights_status", ["unknown", "restricted"]).order("discovered_at", {
+          ascending: false,
+        });
+      else if (queue === "low_quality")
+        q = q.lt("quality_score", 40).order("quality_score", { ascending: true });
+      else if (queue === "black_and_white")
+        q = q.eq("is_color", false).order("discovered_at", { ascending: false });
+      else q = q.order("discovered_at", { ascending: false });
+
+      const { data, error } = await q.limit(60);
+      if (error) throw error;
+      return (data ?? []) as PostWithAuthor[];
+    },
+  });
+}
+
+export function discoveryRunsQuery() {
+  return queryOptions({
+    queryKey: ["admin", "discovery-runs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("discovery_runs")
+        .select("*")
+        .order("started_at", { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 
 export function postQuery(id: string) {
   return queryOptions({

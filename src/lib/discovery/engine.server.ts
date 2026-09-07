@@ -604,10 +604,75 @@ const SOURCES: Array<{ source: ContentSource; run: () => Promise<Candidate[]> }>
   { source: "nasa_svs", run: () => discoverNasaSvs() },
 ];
 
+export type RunResult = {
+  source: ContentSource;
+  ok: boolean;
+  error?: string;
+  examined?: number;
+  inserted?: number;
+  pending?: number;
+  rejected?: number;
+  duplicates?: number;
+};
+
+/** Recomputes the scores of an already-stored discovered post. */
+export async function rescorePost(postId: string) {
+  const weights = await loadWeights();
+  const { data: post, error } = await supabaseAdmin
+    .from("posts")
+    .select("*")
+    .eq("id", postId)
+    .maybeSingle();
+  if (error || !post) throw new Error("Post not found");
+
+  const candidate = {
+    source: post.source,
+    external_id: post.external_id ?? "",
+    canonical_url: post.canonical_url ?? "",
+    playback_url: post.playback_url ?? "",
+    thumbnail_url: post.thumbnail_url,
+    title: post.title,
+    description: post.caption,
+    media_type: post.media_type ?? "video/mp4",
+    duration_seconds: post.duration_seconds,
+    resolution_height: post.resolution_height,
+    frame_rate: post.frame_rate,
+    audio_info: post.audio_info,
+    license: post.license ?? "",
+    license_url: post.license_url,
+    rights_status: post.rights_status,
+    rights_confidence: Number(post.rights_confidence ?? 0),
+    external_creator: post.external_creator,
+    published_at: post.published_at,
+    category: post.category ?? "general",
+    keywords: post.keywords ?? [],
+    is_color: post.is_color,
+    source_metadata: {},
+  } as Candidate;
+
+  const scored = scoreCandidate(candidate, weights);
+  await supabaseAdmin
+    .from("posts")
+    .update({
+      quality_score: scored.quality_score,
+      interestingness_score: scored.interestingness_score,
+      recommendation_score: scored.recommendation_score,
+      audio_quality: scored.audio_quality,
+    })
+    .eq("id", postId);
+
+  return {
+    quality_score: scored.quality_score,
+    interestingness_score: scored.interestingness_score,
+    recommendation_score: scored.recommendation_score,
+  };
+}
+
+
 /** Runs every source independently — one failure never breaks the others. */
 export async function runDiscovery(only?: ContentSource) {
   const weights = await loadWeights();
-  const results: Array<Record<string, unknown>> = [];
+  const results: RunResult[] = [];
 
   for (const entry of SOURCES) {
     if (only && only !== entry.source) continue;

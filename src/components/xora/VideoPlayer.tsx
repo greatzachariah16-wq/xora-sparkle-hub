@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 type Props = {
   mediaPath?: string | null;
   posterPath?: string | null;
+  /** Direct https URL for externally hosted (discovered) videos. */
+  externalUrl?: string | null;
+  /** Direct https thumbnail URL for externally hosted videos. */
+  externalPoster?: string | null;
   vertical?: boolean;
   title?: string;
   autoPlay?: boolean;
@@ -17,6 +21,8 @@ type Props = {
 export function VideoPlayer({
   mediaPath,
   posterPath,
+  externalUrl,
+  externalPoster,
   vertical = false,
   title = "Video",
   autoPlay = false,
@@ -25,8 +31,10 @@ export function VideoPlayer({
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const src = useSignedUrl("videos", mediaPath);
-  const poster = useSignedUrl("posters", posterPath);
+  const signedSrc = useSignedUrl("videos", externalUrl ? null : mediaPath);
+  const signedPoster = useSignedUrl("posters", externalUrl ? null : posterPath);
+  const src = externalUrl ?? signedSrc;
+  const poster = externalPoster ?? signedPoster;
 
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(autoPlay);
@@ -45,7 +53,7 @@ export function VideoPlayer({
     setCurrent(0);
     setTotal(0);
     setScrubbing(false);
-  }, [mediaPath]);
+  }, [mediaPath, externalUrl]);
 
   // Pause and release the element on unmount / source swap so audio never
   // keeps playing after navigating away.
@@ -135,7 +143,7 @@ export function VideoPlayer({
 
   const aspect = vertical ? "aspect-[9/16]" : "aspect-video";
 
-  if (!mediaPath) {
+  if (!mediaPath && !externalUrl) {
     return (
       <div
         className={cn(
