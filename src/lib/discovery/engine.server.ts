@@ -607,7 +607,7 @@ const SOURCES: Array<{ source: ContentSource; run: () => Promise<Candidate[]> }>
 /** Runs every source independently — one failure never breaks the others. */
 export async function runDiscovery(only?: ContentSource) {
   const weights = await loadWeights();
-  const results: Array<Record<string, unknown>> = [];
+  const results: RunResult[] = [];
 
   for (const entry of SOURCES) {
     if (only && only !== entry.source) continue;
