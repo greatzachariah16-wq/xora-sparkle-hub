@@ -19,6 +19,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
+import { Route as SecretDownloadEudorPartnerOnboardingRouteImport } from './routes/secret-download.eudor-partner-onboarding'
 import { Route as VideoPostIdRouteImport } from './routes/video.$postId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -71,6 +72,12 @@ const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
   path: '/profile/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecretDownloadEudorPartnerOnboardingRoute =
+  SecretDownloadEudorPartnerOnboardingRouteImport.update({
+    id: '/secret-download/eudor-partner-onboarding',
+    path: '/secret-download/eudor-partner-onboarding',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const VideoPostIdRoute = VideoPostIdRouteImport.update({
   id: '/video/$postId',
   path: '/video/$postId',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesByTo {
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesById {
@@ -115,6 +124,7 @@ export interface FileRoutesById {
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   id:
     | '__root__'
@@ -156,6 +168,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   fileRoutesById: FileRoutesById
 }
@@ -170,6 +183,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   ShortsRoute: typeof ShortsRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
+  SecretDownloadEudorPartnerOnboardingRoute: typeof SecretDownloadEudorPartnerOnboardingRoute
   VideoPostIdRoute: typeof VideoPostIdRoute
 }
 
@@ -245,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/secret-download/eudor-partner-onboarding': {
+      id: '/secret-download/eudor-partner-onboarding'
+      path: '/secret-download/eudor-partner-onboarding'
+      fullPath: '/secret-download/eudor-partner-onboarding'
+      preLoaderRoute: typeof SecretDownloadEudorPartnerOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/video/$postId': {
       id: '/video/$postId'
       path: '/video/$postId'
@@ -266,6 +287,8 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   ShortsRoute: ShortsRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
+  SecretDownloadEudorPartnerOnboardingRoute:
+    SecretDownloadEudorPartnerOnboardingRoute,
   VideoPostIdRoute: VideoPostIdRoute,
 }
 export const routeTree = rootRouteImport
