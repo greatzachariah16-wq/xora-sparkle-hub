@@ -13,12 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateRouteImport } from './routes/create'
-import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DataRouteImport } from './routes/data'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShortsRouteImport } from './routes/shorts'
 import { Route as ProfileUsernameRouteImport } from './routes/profile.$username'
+import { Route as SecretDownloadEudorPartnerOnboardingRouteImport } from './routes/secret-download.eudor-partner-onboarding'
 import { Route as VideoPostIdRouteImport } from './routes/video.$postId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,14 +42,14 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DataRoute = DataRouteImport.update({
   id: '/data',
   path: '/data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -71,6 +72,12 @@ const ProfileUsernameRoute = ProfileUsernameRouteImport.update({
   path: '/profile/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecretDownloadEudorPartnerOnboardingRoute =
+  SecretDownloadEudorPartnerOnboardingRouteImport.update({
+    id: '/secret-download/eudor-partner-onboarding',
+    path: '/secret-download/eudor-partner-onboarding',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const VideoPostIdRoute = VideoPostIdRouteImport.update({
   id: '/video/$postId',
   path: '/video/$postId',
@@ -82,12 +89,13 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesByTo {
@@ -95,12 +103,13 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRoutesById {
@@ -109,12 +118,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
   '/profile/$username': typeof ProfileUsernameRoute
+  '/secret-download/eudor-partner-onboarding': typeof SecretDownloadEudorPartnerOnboardingRoute
   '/video/$postId': typeof VideoPostIdRoute
 }
 export interface FileRouteTypes {
@@ -124,11 +134,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -136,11 +148,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   id:
     | '__root__'
@@ -148,11 +162,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
     | '/shorts'
     | '/profile/$username'
+    | '/secret-download/eudor-partner-onboarding'
     | '/video/$postId'
   fileRoutesById: FileRoutesById
 }
@@ -161,12 +177,13 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreateRoute: typeof CreateRoute
-  LearnRoute: typeof LearnRoute
   DataRoute: typeof DataRoute
+  LearnRoute: typeof LearnRoute
   NotificationsRoute: typeof NotificationsRoute
   SearchRoute: typeof SearchRoute
   ShortsRoute: typeof ShortsRoute
   ProfileUsernameRoute: typeof ProfileUsernameRoute
+  SecretDownloadEudorPartnerOnboardingRoute: typeof SecretDownloadEudorPartnerOnboardingRoute
   VideoPostIdRoute: typeof VideoPostIdRoute
 }
 
@@ -200,18 +217,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/data': {
       id: '/data'
       path: '/data'
       fullPath: '/data'
       preLoaderRoute: typeof DataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -242,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/secret-download/eudor-partner-onboarding': {
+      id: '/secret-download/eudor-partner-onboarding'
+      path: '/secret-download/eudor-partner-onboarding'
+      fullPath: '/secret-download/eudor-partner-onboarding'
+      preLoaderRoute: typeof SecretDownloadEudorPartnerOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/video/$postId': {
       id: '/video/$postId'
       path: '/video/$postId'
@@ -257,12 +281,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreateRoute: CreateRoute,
-  LearnRoute: LearnRoute,
   DataRoute: DataRoute,
+  LearnRoute: LearnRoute,
   NotificationsRoute: NotificationsRoute,
   SearchRoute: SearchRoute,
   ShortsRoute: ShortsRoute,
   ProfileUsernameRoute: ProfileUsernameRoute,
+  SecretDownloadEudorPartnerOnboardingRoute:
+    SecretDownloadEudorPartnerOnboardingRoute,
   VideoPostIdRoute: VideoPostIdRoute,
 }
 export const routeTree = rootRouteImport
