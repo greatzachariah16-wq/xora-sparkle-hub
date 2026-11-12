@@ -13,8 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreateRouteImport } from './routes/create'
-import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DataRouteImport } from './routes/data'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShortsRouteImport } from './routes/shorts'
@@ -41,14 +41,14 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DataRoute = DataRouteImport.update({
   id: '/data',
   path: '/data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -82,8 +82,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
@@ -95,8 +95,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
@@ -109,8 +109,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/create': typeof CreateRoute
-  '/learn': typeof LearnRoute
   '/data': typeof DataRoute
+  '/learn': typeof LearnRoute
   '/notifications': typeof NotificationsRoute
   '/search': typeof SearchRoute
   '/shorts': typeof ShortsRoute
@@ -124,6 +124,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
@@ -136,6 +137,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
@@ -148,6 +150,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/create'
+    | '/data'
     | '/learn'
     | '/notifications'
     | '/search'
@@ -161,8 +164,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreateRoute: typeof CreateRoute
-  LearnRoute: typeof LearnRoute
   DataRoute: typeof DataRoute
+  LearnRoute: typeof LearnRoute
   NotificationsRoute: typeof NotificationsRoute
   SearchRoute: typeof SearchRoute
   ShortsRoute: typeof ShortsRoute
@@ -200,18 +203,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/data': {
       id: '/data'
       path: '/data'
       fullPath: '/data'
       preLoaderRoute: typeof DataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -257,8 +260,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreateRoute: CreateRoute,
-  LearnRoute: LearnRoute,
   DataRoute: DataRoute,
+  LearnRoute: LearnRoute,
   NotificationsRoute: NotificationsRoute,
   SearchRoute: SearchRoute,
   ShortsRoute: ShortsRoute,
