@@ -22,7 +22,7 @@ function Data() {
   const [network, setNetwork] = useState<(typeof networks)[number]["id"]>("mtn");
   const [planId, setPlanId] = useState("1gb");
   const [phone, setPhone] = useState("");
-  const selected = useMemo(() => plans.find((plan) => plan.id === planId) ?? plans[1], [planId]);
+  const selected = useMemo(() => plans.find((plan) => plan.id === planId) ?? (plans[1] as (typeof plans)[number]), [planId]);
   const phoneValid = /^0\d{10}$/.test(phone);
   const canContinue = phoneValid && Boolean(selected);
 
