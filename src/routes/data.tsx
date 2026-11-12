@@ -16,13 +16,13 @@ const plans = [
   { id: "1gb", label: "1 GB", price: 450, tag: "Popular" },
   { id: "2gb", label: "2 GB", price: 800, tag: "Value" },
   { id: "5gb", label: "5 GB", price: 1900, tag: "Heavy use" },
-] as const;
+];
 
 function Data() {
   const [network, setNetwork] = useState<(typeof networks)[number]["id"]>("mtn");
   const [planId, setPlanId] = useState("1gb");
   const [phone, setPhone] = useState("");
-  const selected = useMemo(() => plans.find((plan) => plan.id === planId) ?? plans[1], [planId]);
+  const selected = useMemo(() => plans.find((plan) => plan.id === planId) ?? (plans[1] as (typeof plans)[number]), [planId]);
   const phoneValid = /^0\d{10}$/.test(phone);
   const canContinue = phoneValid && Boolean(selected);
 
