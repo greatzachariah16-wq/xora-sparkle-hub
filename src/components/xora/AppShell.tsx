@@ -244,6 +244,9 @@ export function AppShell({
                 >
                   <Icon className="size-5" aria-hidden="true" />
                   {label}
+                  {to === "/notifications" && unread > 0 ? (
+                    <span className="absolute right-4 top-0.5 size-2 rounded-full bg-primary" />
+                  ) : null}
                 </Link>
               </li>
             );
